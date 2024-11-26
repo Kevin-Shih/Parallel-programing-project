@@ -10,6 +10,7 @@
 using namespace std;
 using namespace chrono;
 using namespace rrt_utils;
+typedef duration<float> float_secs;
 
 Tree *RRT(vector<vector<int>> &map, Position start, Position target,
           float radius, float step_size, int max_iter, int max_node, float std,
@@ -105,25 +106,27 @@ int main(int argc, char **argv) {
     Position targetpos = Position(385, 675);
     // targetpos = get_target_point(target);
 
-    printf("startpos: [%f, %f], targetpos: [%f, %f]\n", startpos.x, startpos.y,
-           targetpos.x, targetpos.y);
+    printf("startpos: [%.0f, %.0f], targetpos: [%f, %f]\n", startpos.x,
+           startpos.y, targetpos.x, targetpos.y);
     int max_iter = 15000;
     int max_node = 500;
     float std = 500;
     float radius = 15;
     float step_size = 30;
 
-    auto start = high_resolution_clock::now();
+    auto start = system_clock::now();
     vector<Position> path = path_search(map, startpos, targetpos, radius,
                                         step_size, max_iter, max_node, std);
-    auto durations = high_resolution_clock::now() - start;
+    auto end = system_clock::now();
     for (size_t i = 0; i < path.size() - 1; i++) {
-        printf("[%.0f, %.0f] -> ", path[i].x, path[i].y);
+        printf("[%4.0f, %4.0f] -> ", path[i].x, path[i].y);
+        if (i % 4 == 0) cout << endl;
     }
     if (path.size() > 0)
-        printf("[%.0f, %.0f]\n", path[path.size() - 1].x, path[path.size() - 1].y);
+        printf("[%4.0f, %4.0f]\n", path[path.size() - 1].x,
+               path[path.size() - 1].y);
 
-    auto sec = duration_cast<float_seconds>(durations).count();
+    float sec = duration_cast<float_secs>(end - start).count();
     printf("\nTime = %.3fs\n", sec);
     return 0;
 }
