@@ -1,6 +1,6 @@
 #include "Util.h"
 
-namespace utils {
+namespace rrt_utils {
 
 double distance(Position const &pos_1, Position const &pos_2)
 {
@@ -28,7 +28,7 @@ Tree::~Tree()
 TreeNode *get_new_node(TreeNode *start, TreeNode *target, double step_size, double min_step_size)
 {
     Position pos_diff = target->pos - start->pos;
-    double dist = utils::distance(start->pos, target->pos);
+    double dist = rrt_utils::distance(start->pos, target->pos);
     if (dist < min_step_size) {
         return nullptr;
     }
@@ -44,21 +44,17 @@ TreeNode *random_position(Position const &target, float std, mt19937 &generator)
 {
     Position tmp_pos = {-1, -1};
     while (tmp_pos.x >= 1500 || tmp_pos.x < 0) {
-        tmp_pos.x = utils::normal(target.x, std, generator);
+        tmp_pos.x = rrt_utils::normal(target.x, std, generator);
     }
     while (tmp_pos.y >= 1000 || tmp_pos.y < 0) {
-        tmp_pos.y = utils::normal(target.y, std, generator);
+        tmp_pos.y = rrt_utils::normal(target.y, std, generator);
     }
     TreeNode *new_node = new TreeNode(tmp_pos);
     return new_node;
 }
 
-// array<int, 4> get_bound(const Position& point, float radius) {
-//     return {(int)rint(point.x - radius), (int)rint(point.y - radius), (int)rint(point.x + radius), (int)rint(point.y + radius)};
-// }
-
 bool point_near_obstacle(const vector<vector<int>>& map, const Position& point, float radius) {
-    auto vec = utils::get_bound(point, radius);
+    auto vec = rrt_utils::get_bound(point, radius);
 
     float low_x = max(0, (int)rint(vec[0]));
     float low_y = max(0, (int)rint(vec[1]));
@@ -67,7 +63,7 @@ bool point_near_obstacle(const vector<vector<int>>& map, const Position& point, 
 
     for (int y = low_y; y <= high_y; ++y) {
         for (int x = low_x; x <= high_x; ++x) {
-            if (map[y][x] != 255) {
+            if (map[y][x] == 0) {
                 return true;
             }
         }
@@ -76,7 +72,7 @@ bool point_near_obstacle(const vector<vector<int>>& map, const Position& point, 
 }
 
 bool intersection(const vector<vector<int>>& map, const Position& start, const Position& end, float radius) {
-    double dist = utils::distance(start, end);
+    double dist = rrt_utils::distance(start, end);
     int num_points = static_cast<int>(dist);
     for (int i = 0; i <= num_points; ++i) {
         Position point = {
@@ -103,7 +99,7 @@ TreeNode* nearest(TreeNode* root, const TreeNode* target, const vector<vector<in
         queue.pop();
 
         if (!intersection(map, current->pos, target->pos, radius)) {
-            double dist = utils::distance(current->pos, target->pos);
+            double dist = rrt_utils::distance(current->pos, target->pos);
             if (dist < min_dist) {
                 min_dist = dist;
                 nearest_node = current;

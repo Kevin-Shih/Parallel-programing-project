@@ -17,6 +17,7 @@ if [ ! -d "./opencv" ]; then
           -DWITH_OPENMP=OFF \
           -DWITH_CUDA=OFF \
           -DWITH_QT=OFF \
+          -DBUILD_OPENJPEG:BOOL=ON \
           -DWITH_OPENGL=OFF ..
 
     cmake --build . --config Release -- -j$(nproc)
