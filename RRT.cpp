@@ -1,17 +1,18 @@
-#include<cstdio>
-#include<cstdlib>
-#include<iostream>
-#include<time>
-#include<vector>
-#include<Util.h>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <ctime>
+#include <vector>
+
+#include "Util.h"
+
 using namespace std;
 
-
-Tree* RRT(bool **map, float start[2], float target[2], float radius, float step_size, 
-          int max_iter, int max_node = 500, float std=350) {
-    TreeNode *root = &TreeNode(start);
-    TreeNode *end = &TreeNode(target);
-    Tree *tree = &Tree(root, end);
+Tree* RRT(bool **map, Position start, Position target, float radius, float step_size, 
+          int max_iter, int max_node, float std, std::mt19937 &generator) {
+    TreeNode *root = new TreeNode(start);
+    TreeNode *end = new TreeNode(target);
+    Tree *tree = new Tree(root, end);
     int i, n_count = 0;
     for (i = 0; i < max_iter; i++) {
         TreeNode *near_node = nearest(root, end, map, radius);
@@ -22,7 +23,7 @@ Tree* RRT(bool **map, float start[2], float target[2], float radius, float step_
             tree->success = true;
             new_node = end;
         } else {
-            TreeNode *rand_node = random_position(end->pos, std);
+            TreeNode *rand_node = random_position(end->pos, std, generator);
             if (point_near_obstacle(map, rand_node->pos, radius))
                 continue;
             near_node = nearest(root, rand_node, map, radius);
@@ -33,9 +34,9 @@ Tree* RRT(bool **map, float start[2], float target[2], float radius, float step_
                 continue;
         }
         n_count ++;
-        float dist = distance(new_node->pos, end->pos);
+        float dist = utils::distance(new_node->pos, end->pos);
         printf("%4dth node:  pos = [%.1f, %.1f], dist = %4.1f cm           \r",
-                n_count, new_node->pos[0], new_node->pos[1], dist);
+                n_count, new_node->pos.x, new_node->pos.y, dist);
         if (n_count >= max_node || tree->success)
             break;
     }
@@ -44,20 +45,23 @@ Tree* RRT(bool **map, float start[2], float target[2], float radius, float step_
     return tree;
 }
 
-vector<float[2]> path_search(bool **map, float startpos[2], float endpos[2],
+vector<Position> path_search(bool **map, Position startpos, Position endpos,
                                  float radius= 15, float step_size= 30, int max_iter= 10000,
-                                 int max_node= 500, float std= 500, string path_name= ""){
-
-    Tree *tree = RRT(map, startpos, endpos, radius, step_size, max_iter, max_node, std);
-    vector<float[2]> path;
+                                 int max_node= 500, float std= 500, string path_name= "")
+{
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    Tree *tree = RRT(map, startpos, endpos, radius, step_size, max_iter, max_node, std, rng);
+    vector<Position> path;
     if (tree->success){
         TreeNode *current = tree->end;
         while (current) {
             path.insert(path.begin(), current->pos);
             current = current->parent;
         }
-    } else
+    } else {
         printf("failed.");
+    }
     // plot(map, tree, startpos, endpos, path, path_name);
     return path;
 }
@@ -79,8 +83,8 @@ int main(int argc, char** argv){
 
     /* set start and destination point*/
     // startpos = get_start_point(img);
-    float startpos[2] = {1235, 330};
-    float targetpos[2] = {330, 235};
+    Position startpos = Position(1235, 330);
+    Position targetpos = Position(330, 235);
     // targetpos = get_target_point(target);
 
     /*
@@ -92,17 +96,17 @@ int main(int argc, char** argv){
     targetpos = t_pos[t == target][0]
     */
 
-    printf("startpos: [%f, %f], targetpos: [%f, %f]\n", startpos[0], startpos[1], targetpos[0], targetpos[1]);
+    printf("startpos: [%f, %f], targetpos: [%f, %f]\n", startpos.x, startpos.y, targetpos.x, targetpos.y);
     int max_iter = 10000;
     float radius = 10;
     float step_size = 30;
 
-    vector<float[2]> path = path_search(map, startpos, targetpos, radius, step_size, max_iter, 500, 500);
+    vector<Position> path = path_search(map, startpos, targetpos, radius, step_size, max_iter, 500, 500);
     for (size_t i = 0; i < path.size() - 1; i++)
     {
-        printf("[%f, %f] ->", path[i][0], path[i][1]);
+        printf("[%f, %f] ->", path[i].x, path[i].y);
     }
-    printf("[%f, %f]\n", path[path.size() - 1][0], path[path.size() - 1][1]);
+    printf("[%f, %f]\n", path[path.size() - 1].x, path[path.size() - 1].y);
     
     return 0;
 }
