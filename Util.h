@@ -2,12 +2,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <array>
+#include <queue>
 
 #include <cmath>
 #include <random>
 
 using namespace std;
-using namespace cv;
+// using namespace cv;
 
 struct Position {
     float x;
@@ -114,13 +116,13 @@ TreeNode *get_new_node(TreeNode *start, TreeNode *target, double step_size, doub
 TreeNode *random_position(Position const &target, float std, std::mt19937 &generator);
 
 // need 2
-bool point_near_obstacle(bool **map, Position point, float radius);
+bool point_near_obstacle(const vector<vector<int>> &map, const Position& point, float radius);
 
 // need 2
-bool intersection(bool **map, TreeNode *start, TreeNode *end, float radius);
+bool intersection(const vector<vector<int>> &map, const TreeNode *start, const TreeNode *end, float radius);
 
 // need 2
-TreeNode* nearest(TreeNode *root, TreeNode *target, bool **map, float radius);
+TreeNode* nearest(TreeNode *root, const TreeNode *target, const vector<vector<int>> &map, float radius);
 
 // matplotlib visualization
 /*

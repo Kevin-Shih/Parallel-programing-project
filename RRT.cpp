@@ -3,12 +3,13 @@
 #include <iostream>
 #include <ctime>
 #include <vector>
+// #include <opencv2/core.hpp>
 
 #include "Util.h"
 
 using namespace std;
 
-Tree* RRT(bool **map, Position start, Position target, float radius, float step_size, 
+Tree* RRT(vector<vector<int>>& map, Position start, Position target, float radius, float step_size, 
           int max_iter, int max_node, float std, std::mt19937 &generator) {
     TreeNode *root = new TreeNode(start);
     TreeNode *end = new TreeNode(target);
@@ -45,7 +46,7 @@ Tree* RRT(bool **map, Position start, Position target, float radius, float step_
     return tree;
 }
 
-vector<Position> path_search(bool **map, Position startpos, Position endpos,
+vector<Position> path_search(vector<vector<int>>& map, Position startpos, Position endpos,
                                  float radius= 15, float step_size= 30, int max_iter= 10000,
                                  int max_node= 500, float std= 500, string path_name= "")
 {
@@ -68,14 +69,14 @@ vector<Position> path_search(bool **map, Position startpos, Position endpos,
 
 int main(int argc, char** argv){
     /* read img as bool map; */
-    Mat img, dst;
-    img = imread("map.png", 1);
-    cvtColor(img, dst, CV_BGR2GRAY);
-    // dst.convertTo(dst, CV_32F);
-    bool map[dst.rows][dst.cols];
-    for(int i = 0 ;i < dst.rows; ++i)
-        for(int j = 0; j < dst.cols; ++j)
-                map[i][j]= dst.at<float>(i,j)[0] == 255;
+    // Mat img, dst;
+    // img = imread("map.png", 1);
+    // cvtColor(img, dst, CV_BGR2GRAY);
+    // // dst.convertTo(dst, CV_32F);
+    vector<vector<int>> map(1500, vector<int>(1000));
+    // for(int i = 0 ;i < dst.rows; ++i)
+    //     for(int j = 0; j < dst.cols; ++j)
+    //             map[i][j]= dst.at<float>(i,j)[0] == 255;
 
     // if (dst.at<float>(i,j)[0] == 255 &&
     //             dst.at<float>(i,j)[1] == 255 &&
@@ -84,7 +85,7 @@ int main(int argc, char** argv){
     /* set start and destination point*/
     // startpos = get_start_point(img);
     Position startpos = Position(1235, 330);
-    Position targetpos = Position(330, 235);
+    Position targetpos = Position(1200, 110);
     // targetpos = get_target_point(target);
 
     /*
