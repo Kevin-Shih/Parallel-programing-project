@@ -89,6 +89,7 @@ vector<Position> path_search(vector<vector<int>> &map, Position startpos,
 }
 
 typedef duration<float> float_seconds;
+
 int main() {
     /* read img as bool map; */
     Mat img;
@@ -96,11 +97,12 @@ int main() {
     img.convertTo(img, CV_32F);
     vector<vector<int>> map(1000, vector<int>(1500));
     Mat temp_mat(1000, 1500, CV_8U);
-    for (int i = 0; i < img.rows; ++i)
+    for (int i = 0; i < img.rows; ++i) {
         for (int j = 0; j < img.cols; ++j) {
             map[i][j] = (img.at<float>(i, j) >= 255);
             temp_mat.at<uchar>(i, j) = (img.at<float>(i, j) >= 250) * 255;
         }
+    }
     imwrite("res/read_map.png", temp_mat);
 
     /* set start and destination point*/
@@ -121,13 +123,30 @@ int main() {
     vector<Position> path = path_search(map, startpos, targetpos, radius,
                                         step_size, max_iter, max_node, std);
     auto end = system_clock::now();
+
+    cv::Point point_1, point_2;
+    cv::Scalar draw_color(0);
+    int thickness = 2;
+    int line_type = cv::LINE_8;
+
+    point_1 = cv::Point(startpos.x, startpos.y);
+    point_2 = cv::Point(targetpos.x, targetpos.y);
+
+    cv::circle(temp_mat, point_1, 4, draw_color, thickness, cv::LINE_AA);
+    cv::circle(temp_mat, point_2, 4, draw_color, thickness, cv::LINE_AA);
+
     for (size_t i = 0; i < path.size() - 1; i++) {
         printf("[%4.0f, %4.0f] -> ", path[i].x, path[i].y);
+        point_1 = cv::Point(static_cast<int>(path[i].x), static_cast<int>(path[i].y));
+        point_2 = cv::Point(static_cast<int>(path[i + 1].x), static_cast<int>(path[i + 1].y));
+        cv::line(temp_mat, point_1, point_2, draw_color, thickness, line_type);
         if (i % 4 == 0) cout << endl;
     }
-    if (path.size() > 0)
-        printf("[%4.0f, %4.0f]\n", path[path.size() - 1].x,
-               path[path.size() - 1].y);
+    imwrite("res/with_lines.png", temp_mat);
+
+    if (path.size() > 0) {
+        printf("[%4.0f, %4.0f]\n", path[path.size() - 1].x, path[path.size() - 1].y);
+    }
 
     float sec = duration_cast<float_secs>(end - start).count();
     printf("\nTime = %.3fs\n", sec);

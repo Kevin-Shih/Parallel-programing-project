@@ -2,3 +2,4 @@
 build
 opencv
 RRT
+*/*.png
