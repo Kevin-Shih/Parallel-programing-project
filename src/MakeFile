@@ -1,0 +1,34 @@
+NVCC=nvcc
+CXX=g++
+CXXFLAGS= -Iobjs/ -O3 -std=c++17 -Wall -g -fPIC -lm
+
+APP_NAME=RRT_cuda
+OBJDIR=objs
+COMMONDIR=./common
+
+CUDA_LINK_FLAGS =  -rdc=true -gencode=arch=compute_61,code=sm_61 -Xcompiler '-fPIC' 
+CUDA_COMPILE_FLAGS = --device-c -gencode=arch=compute_61,code=sm_61 -Xcompiler '-fPIC' -g -O3
+
+
+default: $(APP_NAME)
+
+.PHONY: dirs clean
+
+dirs:
+		/bin/mkdir -p $(OBJDIR)/
+
+clean:
+		$(RM) -r $(OBJDIR) *.ppm *~ $(APP_NAME)
+
+OBJS=$(OBJDIR)/RRT_cuda.o $(OBJDIR)/kernel_util.o
+
+$(APP_NAME): dirs $(OBJS)
+		$(NVCC) ${CUDA_LINK_FLAGS} -o $@ $(OBJS)
+
+$(OBJDIR)/RRT_cuda.o: RRT_cuda.cpp
+		$(CXX) $< $(CXXFLAGS) -c -o $@
+
+$(OBJDIR)/main.o: kernel_util.h
+
+$(OBJDIR)/kernel_util.o : kernel_util.cu kernel_util.h
+	${NVCC} ${CUDA_COMPILE_FLAGS} -c kernel_util.cu -o $@
