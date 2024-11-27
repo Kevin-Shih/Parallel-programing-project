@@ -49,7 +49,10 @@ Tree *RRT(vector<vector<int>> &map, Position start, Position target,
         float dist = distance(new_node->pos, end->pos);
         printf("%4dth node:  pos = [%.1f, %.1f], dist = %4.1f cm    \r",
                n_count, new_node->pos.x, new_node->pos.y, dist);
-        if (n_count >= max_node || tree->success) break;
+        fflush(stdout);
+        if (n_count >= max_node || tree->success) {
+            break;
+        }
     }
     if (tree->success)
         printf("\nFinish RRT construction in %d iters with %d nodes.\n\n",
@@ -86,7 +89,7 @@ vector<Position> path_search(vector<vector<int>> &map, Position startpos,
 }
 
 typedef duration<float> float_seconds;
-int main(int argc, char **argv) {
+int main() {
     /* read img as bool map; */
     Mat img;
     img = cv::imread("res/map.png", IMREAD_GRAYSCALE);

@@ -20,12 +20,6 @@ struct Position {
 
     Position(float _x, float _y)
         : x(_x), y(_y) {}
-    Position &operator=(const Position &other)
-    {
-        x = other.x;
-        y = other.y;
-        return *this;
-    }
     Position operator+(const Position &other) const
     {
         return Position(x + other.x, y + other.y);
@@ -112,7 +106,7 @@ public:
     ~Tree();
     TreeNode *root;
     TreeNode *end;
-    bool success;
+    bool success = false;
 };
 
 TreeNode *get_new_node(TreeNode *start, TreeNode *target, double step_size, double min_step_size = 3);
