@@ -4,12 +4,14 @@
 #include <ctime>
 #include <iostream>
 #include <vector>
+#include <omp.h>
 
 #include "Util.h"
 
 using namespace std;
 using namespace chrono;
 using namespace rrt_utils;
+
 typedef duration<float> float_secs;
 
 Tree *RRT(vector<vector<int>> &map, Position start, Position target,
@@ -20,7 +22,9 @@ Tree *RRT(vector<vector<int>> &map, Position start, Position target,
     Tree *tree = new Tree(root, end);
 
     int i, n_count = 0;
+
     for (i = 0; i < max_iter; i++) {
+        if (tree->success) break;
         TreeNode *near_node = nearest(root, end, map, radius);
         TreeNode *new_node = NULL;
         if (near_node) {
@@ -29,34 +33,50 @@ Tree *RRT(vector<vector<int>> &map, Position start, Position target,
             tree->success = true;
             new_node = end;
         } else {
-            TreeNode *rand_node = random_position(end->pos, std, generator);
-            if (point_near_obstacle(map, rand_node->pos,
-                                    radius)) { // if not valid rand_node
-                i--;
-                continue;
+            #pragma omp parallel
+            {
+                TreeNode *local_new_node = nullptr;
+                TreeNode *local_near_node = nullptr;
+                std::mt19937 thread_generator(generator());
+                #pragma omp for nowait
+                for (int attempt = 0; attempt < max_iter; ++attempt) {
+                    if (new_node) break;
+
+                    TreeNode *rand_node = random_position(end->pos, std, thread_generator);
+                    if (point_near_obstacle(map, rand_node->pos, radius)) {
+                        continue; // Skip invalid rand_node
+                    }
+
+                    local_near_node = nearest(root, rand_node, map, radius);
+                    if (!local_near_node) {
+                        continue; // Skip if no valid near_node
+                    }
+
+                    local_new_node = get_new_node(local_near_node, rand_node, step_size);
+                    if (!local_new_node) {
+                        continue; // Skip if step too small
+                    }
+                    if (!new_node) {
+                        new_node = local_new_node;
+                        near_node = local_near_node;
+                    }
+                    break;
+                }
             }
-            near_node = nearest(root, rand_node, map, radius);
-            if (!near_node) { // if no valid near_node
-                continue;
-            }
-            new_node = get_new_node(near_node, rand_node, step_size);
-            if (!new_node) { // if step too small
-                i--;
-                continue;
-            }
+            if (!new_node) break;
         }
         n_count++;
         float dist = distance(new_node->pos, end->pos);
         printf("%4dth node:  pos = [%.1f, %.1f], dist = %4.1f cm    \r",
-               n_count, new_node->pos.x, new_node->pos.y, dist);
-        fflush(stdout);
+            n_count, new_node->pos.x, new_node->pos.y, dist);
+        // fflush(stdout);
         if (n_count >= max_node || tree->success) {
             break;
         }
     }
     if (tree->success)
         printf("\nFinish RRT construction in %d iters with %d nodes.\n\n",
-               i + 1, n_count);
+            i + 1, n_count);
     else
         printf(
             "\nFailed! RRT construction terminated at iter %d with %d "
@@ -133,3 +153,4 @@ int main() {
     printf("\nTime = %.3fs\n", sec);
     return 0;
 }
+

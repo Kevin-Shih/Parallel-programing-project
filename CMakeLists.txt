@@ -13,4 +13,3 @@ add_executable(RRT
     src/Util.cpp)
 
 target_link_libraries(RRT ${OpenCV_LIBS})
-
