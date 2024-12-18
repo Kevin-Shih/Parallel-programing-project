@@ -25,8 +25,11 @@ if [ ! -d "./opencv" ]; then
     cd ../../
 fi
 
+rm -f build/RRT
+rm -f build/RRT_serial
+
 cmake -B build
 cmake --build build
 
-rm -f RRT
-ln -s build/RRT RRT
+ln -fs build/RRT RRT
+ln -fs build/RRT_serial RRT_serial
