@@ -77,7 +77,6 @@ bool intersection(const vector<vector<uint8_t>>& map, const Position& start, con
     int num_points = static_cast<int>(rrt_utils::distance(start, end));
     int flag = true; // whether all not obstacles
 
-#pragma omp parallel for reduction(& : flag) schedule(dynamic, 64) num_threads(8)
     for (int i = 0; i <= num_points; ++i) {
         int x = start.x + static_cast<int>((end.x - start.x) * i / num_points);
         int y = start.y + static_cast<int>((end.y - start.y) * i / num_points);
@@ -87,44 +86,22 @@ bool intersection(const vector<vector<uint8_t>>& map, const Position& start, con
 }
 
 TreeNode* nearest(vector<TreeNode*>& vec, const TreeNode* target) {
-    // TreeNode* nearest_node = nullptr;
     double min_dist = std::numeric_limits<double>::max();
     int min_node = 0;
-// queue<TreeNode*> queue;
-// queue.push(root);
-// while (!queue.empty()) {
-//     TreeNode* current = queue.front();
-//     queue.pop();
-//     vec.push_back(current);
-//     for (TreeNode* child : current->child) {
-//         queue.push(child);
-//     }
-// }
-#pragma omp parallel num_threads(8)
-    {
-        // near_node local_nearest = {std::numeric_limits<double>::max(), NULL};
-        // double local_min_dist = std::numeric_limits<double>::max();
-        // int local_min_node = -1;
-#pragma omp for nowait schedule(dynamic, 64)
-        for (size_t i = 0; i < vec.size(); i++) {
-            double dist = rrt_utils::distance(vec[i]->pos, target->pos);
-            if (dist < min_dist) {
-                min_dist = dist;
-                min_node = i;
-            }
+    for (size_t i = 0; i < vec.size(); i++) {
+        double dist = rrt_utils::distance(vec[i]->pos, target->pos);
+        if (dist < min_dist) {
+            min_dist = dist;
+            min_node = i;
         }
-        // if (local_min_dist < min_dist) {
-        //     min_dist = local_min_dist;
-        //     min_node = local_min_node;
-        // }
     }
+
     return vec[min_node];
 }
 
 void inflate_map(Mat img, vector<vector<uint8_t>>& out_map, double radius) {
     _h = img.rows;
     _w = img.cols;
-#pragma omp parallel for schedule(dynamic, 64) num_threads(8)
     for (int index = 0; index < img.rows * img.cols; index++) {
         int y = index / img.cols;
         int x = index % img.cols;

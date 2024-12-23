@@ -17,8 +17,8 @@ using namespace std;
 using namespace cv;
 
 
-#ifndef __RRT_UTIL__
-#define __RRT_UTIL__
+// #ifndef __RRT_UTIL__
+// #define __RRT_UTIL__
 struct Position {
         float x;
         float y;
@@ -96,4 +96,4 @@ void inflate_map(Mat img, vector<vector<uint8_t>> &out_map, double radius);
 
 void plot(Mat map, Tree *tree, const Position &startpos, const Position &endpos,
           vector<Position> path, string path_name = "");
-#endif
+// #endif

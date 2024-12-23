@@ -13,8 +13,8 @@ add_executable(RRT
     src/RRT.cpp
     src/Util.cpp)
 add_executable(RRT_serial
-    src/RRT.cpp
-    src/Util.cpp)
+    src/RRT_serial.cpp
+    src/Util_serial.cpp)
 
 target_link_libraries(RRT_serial ${OpenCV_LIBS})
 target_link_libraries(RRT ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
