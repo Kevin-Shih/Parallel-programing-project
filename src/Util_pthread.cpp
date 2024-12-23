@@ -60,13 +60,13 @@ TreeNode* get_new_node(const vector<vector<uint8_t>>& map, TreeNode* start, Tree
     }
     return nullptr;
 }
-int _w, _h;
+
 TreeNode* random_position(Position const& target, float std, mt19937& generator) {
     Position tmp_pos = {-1, -1};
-    while (tmp_pos.x >= _w || tmp_pos.x < 0) {
+    while (tmp_pos.x >= 1500 || tmp_pos.x < 0) {
         tmp_pos.x = rrt_utils::normal(target.x, std, generator);
     }
-    while (tmp_pos.y >= _h || tmp_pos.y < 0) {
+    while (tmp_pos.y >= 1000 || tmp_pos.y < 0) {
         tmp_pos.y = rrt_utils::normal(target.y, std, generator);
     }
     TreeNode* new_node = new TreeNode(tmp_pos);

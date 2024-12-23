@@ -28,10 +28,13 @@ fi
 rm -f build/RRT_omp
 rm -f build/RRT_pthread
 rm -f build/RRT_serial
+rm -f ./RRT_omp
+rm -f ./RRT_pthread
+rm -f ./RRT_serial
 
 cmake -B build
 cmake --build build
 
-ln -fs build/RRT_omp RRT_omp
-ln -fs build/RRT_pthread RRT_pthread
-ln -fs build/RRT_serial RRT_serial
+ln -s build/RRT_omp RRT_omp
+ln -s build/RRT_pthread RRT_pthread
+ln -s build/RRT_serial RRT_serial
