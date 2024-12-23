@@ -3,3 +3,5 @@ build
 opencv
 RRT
 RRT_*
+res/read_map.png
+res/result_omp.png

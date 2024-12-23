@@ -12,6 +12,8 @@
 #include <queue>
 #include <random>
 #include <vector>
+#include <atomic>
+#include <algorithm>
 
 using namespace std;
 using namespace cv;
@@ -79,6 +81,34 @@ struct result {
         Tree *tree;
         vector<Position> path;
         float time;
+};
+
+struct CheckSegArgs {
+    const vector<vector<uint8_t>>* map;
+    const Position* start;
+    const Position* end;
+    int start_idx;
+    int end_idx;
+    int x_bound;
+    int y_bound;
+    std::atomic<bool>* flag;
+};
+
+struct NearestArgs {
+    const vector<TreeNode*>* vec;
+    const TreeNode* target;
+    size_t start_idx;
+    size_t end_idx;
+    double local_min_dist;
+    int local_min_node;
+};
+
+struct InflateArgs {
+    const Mat* img;
+    vector<vector<uint8_t>>* out_map;
+    double radius;
+    int start_idx;
+    int end_idx;
 };
 
 TreeNode *get_new_node(const vector<vector<uint8_t>> &map, TreeNode *start, TreeNode *target,

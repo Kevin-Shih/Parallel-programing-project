@@ -25,11 +25,13 @@ if [ ! -d "./opencv" ]; then
     cd ../../
 fi
 
-rm -f build/RRT
+rm -f build/RRT_omp
+rm -f build/RRT_pthread
 rm -f build/RRT_serial
 
 cmake -B build
 cmake --build build
 
-ln -fs build/RRT RRT
+ln -fs build/RRT_omp RRT_omp
+ln -fs build/RRT_pthread RRT_pthread
 ln -fs build/RRT_serial RRT_serial
