@@ -1,14 +1,22 @@
 # 2024-Fall NYCU Parallel Programing Final Project
 
 ## Parallelization of RRT Algorithm
-- Visualiztion ~~and opencv(readmap)~~ not yet ready.
-- ~~Find or design a map image.~~
-- ~~Maybe need a main.cpp as a wrapper,~~ easier to compare **sequential**, **OMP**, **CUDA** version.  
-    -> Directly use RRT.cpp as main. include and run all version in RRT.cpp main func.
-- Make file: compile ~~main and sequential~~, **OMP**, **CUDA** version RRT & Util program.
+We Parallelizd widely used path finding algorithm RRT using OpenMP (and Pthread, on feature branch) and achieve reasonable speedup.
 
-## 工作分配
-**CPP**
-- Need 1 Freddy Chen
-- Need 2 Joker
-- Need 3 施泰俊
+## Usage
+1.  Install by running the `install.sh` script
+2.  Run Parallel RRT by `./RRT -m 0 -v -p`. (By Default 8 threads)
+    Run Serial by `./RRT_serial -m 0 -v -p`. 
+3.  All the command line option listed here. Use `-h`, `--help` to show this message
+    ```
+    Usage: RRT [options]
+    Program Options:
+      -i  --iter    <INT>   Test iterations(>1)
+      -m  --map     <INT>   Input map (0, 1, 2, 3)
+      -r  --radius  <FLOAT> Radius to inflate the obstacles
+      -l  --steplen <FLOAT> Step length for getting new nodes(>15)
+      -s  --std     <FLOAT> Std for generate rand node
+      -p  --plot            Whether to plot the result and save
+      -v  --verbose <INT>   Whether to print info
+      -h  --help            This message
+    ```
