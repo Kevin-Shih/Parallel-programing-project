@@ -4,6 +4,7 @@
 We Parallelizd widely used path finding algorithm RRT using OpenMP (and Pthread, on feature branch) and achieve reasonable speedup.
 
 ## Usage
+Dependencies: `CMake`, `g++`, `OpenCV`, `OpenMP`
 1.  Install by running the `install.sh` script
 2.  Run Parallel RRT by `./RRT -m 0 -v -p`. (By Default 8 threads)
     Run Serial by `./RRT_serial -m 0 -v -p`. 
