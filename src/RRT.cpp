@@ -13,11 +13,11 @@ using namespace rrt_utils;
 
 typedef duration<float> float_secs;
 
-string _map_names[] = {"res/map.png", "res/maze1.png", "res/maze2.png", "res/maze3.png"};
+string _map_names[] = {"res/map.png", "res/maze1.png", "res/maze2.png", "res/maze3.png", "res/maze2_mid.png", "res/maze2_big.png"};
 Position _startposs[] = {Position(1235, 330), Position(10, 445), Position(20, 405),
-                         Position(1265, 65)};
+                         Position(1265, 65), Position(20, 405)*2.5, Position(20, 405)*4};
 Position _targetposs[] = {Position(390, 665), Position(585, 975), Position(215, 975),
-                          Position(180, 945)};
+                          Position(180, 945), Position(215, 975)*2.5, Position(215, 975)*4};
 struct arguments {
         int testruns = 1;
         int max_iter = 250000;
@@ -62,7 +62,7 @@ arguments process_opt(int argc, char *argv[]) {
             }
             case 'm': {
                 int i = atoi(optarg);
-                if (i < 4) {
+                if (i < 5) {
                     args.map_name = _map_names[i];
                     args.startpos = _startposs[i];
                     args.targetpos = _targetposs[i];
@@ -130,7 +130,7 @@ Tree *RRT(arguments args, vector<vector<uint8_t>> &map, Position start, Position
                 TreeNode *rand_node = random_position(end->pos, std, thread_generator);
                 if (map[rand_node->pos.y][rand_node->pos.x]) {
                     near_node = nearest(vec, rand_node);
-                    uniform_real_distribution<double> distribution(15, step_size);
+                    uniform_real_distribution<double> distribution(max(15.0f, step_size/5), step_size);
                     double rng_step_size = distribution(thread_generator);
                     new_node = get_new_node(map, near_node, rand_node, rng_step_size);
                     if (new_node) {
@@ -196,27 +196,28 @@ int main(int argc, char **argv) {
     /* read img as bool map; */
     Mat img;
     img = imread(args.map_name, IMREAD_GRAYSCALE);
-    vector<vector<uint8_t>> map(1000, vector<uint8_t>(1500, 1));
+    vector<vector<uint8_t>> map(img.rows, vector<uint8_t>(img.cols, 1));
     vector<float> times;
-    for (int runs = 0; runs < args.testruns; runs++) {
-        auto start = system_clock::now();
-        inflate_map(img, map, args.radius);
-        auto mid = system_clock::now();
+    
+    auto start = system_clock::now();
+    inflate_map(img, map, args.radius);
+    auto mid = system_clock::now();
 
-        if (args.plot) { // plot how the map is read (with obstacles inflated)
-            Mat temp_mat(1000, 1500, CV_8U);
-            for (int i = 0; i < img.rows; ++i) {
-                for (int j = 0; j < img.cols; ++j) {
-                    temp_mat.at<uint8_t>(i, j) = map[i][j] ? 255 : 0;
-                }
+    if (args.plot) { // plot how the map is read (with obstacles inflated)
+        Mat temp_mat(img.rows, img.cols, CV_8U);
+        for (int i = 0; i < img.rows; ++i) {
+            for (int j = 0; j < img.cols; ++j) {
+                temp_mat.at<uint8_t>(i, j) = map[i][j] ? 255 : 0;
             }
-            Point start_point = Point(args.startpos.x, args.startpos.y);
-            Point target_point = Point(args.targetpos.x, args.targetpos.y);
-            circle(temp_mat, start_point, 6, Scalar(0, 0, 0), 10, LINE_AA);
-            circle(temp_mat, target_point, 6, Scalar(0, 0, 0), 10, LINE_AA);
-            imwrite("res/read_map.png", temp_mat);
         }
+        Point start_point = Point(args.startpos.x, args.startpos.y);
+        Point target_point = Point(args.targetpos.x, args.targetpos.y);
+        circle(temp_mat, start_point, 6, Scalar(0, 0, 0), 10, LINE_AA);
+        circle(temp_mat, target_point, 6, Scalar(0, 0, 0), 10, LINE_AA);
+        imwrite("res/read_map.png", temp_mat);
+    }
 
+    for (int runs = 0; runs < args.testruns; runs++) {
         auto [tree, path, time] =
             path_search(args, map, args.startpos, args.targetpos, args.step_size, args.max_iter,
                         args.max_node, args.std);

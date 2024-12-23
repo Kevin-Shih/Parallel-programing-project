@@ -60,13 +60,13 @@ TreeNode* get_new_node(const vector<vector<uint8_t>>& map, TreeNode* start, Tree
     }
     return nullptr;
 }
-
+int _w, _h;
 TreeNode* random_position(Position const& target, float std, mt19937& generator) {
     Position tmp_pos = {-1, -1};
-    while (tmp_pos.x >= 1500 || tmp_pos.x < 0) {
+    while (tmp_pos.x >= _w || tmp_pos.x < 0) {
         tmp_pos.x = rrt_utils::normal(target.x, std, generator);
     }
-    while (tmp_pos.y >= 1000 || tmp_pos.y < 0) {
+    while (tmp_pos.y >= _h || tmp_pos.y < 0) {
         tmp_pos.y = rrt_utils::normal(target.y, std, generator);
     }
     TreeNode* new_node = new TreeNode(tmp_pos);
@@ -77,7 +77,7 @@ bool intersection(const vector<vector<uint8_t>>& map, const Position& start, con
     int num_points = static_cast<int>(rrt_utils::distance(start, end));
     int flag = true; // whether all not obstacles
 
-#pragma omp parallel for reduction(& : flag) schedule(dynamic, 64)
+#pragma omp parallel for reduction(& : flag) schedule(dynamic, 64) num_threads(8)
     for (int i = 0; i <= num_points; ++i) {
         int x = start.x + static_cast<int>((end.x - start.x) * i / num_points);
         int y = start.y + static_cast<int>((end.y - start.y) * i / num_points);
@@ -100,7 +100,7 @@ TreeNode* nearest(vector<TreeNode*>& vec, const TreeNode* target) {
 //         queue.push(child);
 //     }
 // }
-#pragma omp parallel
+#pragma omp parallel num_threads(8)
     {
         // near_node local_nearest = {std::numeric_limits<double>::max(), NULL};
         // double local_min_dist = std::numeric_limits<double>::max();
@@ -122,7 +122,9 @@ TreeNode* nearest(vector<TreeNode*>& vec, const TreeNode* target) {
 }
 
 void inflate_map(Mat img, vector<vector<uint8_t>>& out_map, double radius) {
-#pragma omp parallel for schedule(dynamic, 64)
+    _h = img.rows;
+    _w = img.cols;
+#pragma omp parallel for schedule(dynamic, 64) num_threads(8)
     for (int index = 0; index < img.rows * img.cols; index++) {
         int y = index / img.cols;
         int x = index % img.cols;
