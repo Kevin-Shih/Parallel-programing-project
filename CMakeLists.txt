@@ -17,4 +17,4 @@ add_executable(RRT_serial
     src/Util.cpp)
 
 target_link_libraries(RRT_serial ${OpenCV_LIBS})
-target_link_libraries(RRT ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
+target_link_libraries(RRT ${OpenCV_LIBS})
